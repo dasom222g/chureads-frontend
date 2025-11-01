@@ -1,13 +1,26 @@
 // hooks/useNotification.js
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * 브라우저 알림 기능을 관리하는 훅
  * 권한 요청 및 알림 표시 기능 제공
  */
 const useNotification = () => {
+  // ⭐️ Notification 지원 여부 체크
+  const [isNotificationSupported, setIsNotificationSupported] = useState(false);
+
+  useEffect(() => {
+    // ⭐️ 알림 지원여부 세팅
+    const isSupported =
+      typeof window !== "undefined" && "Notification" in window;
+    setIsNotificationSupported(isSupported);
+    console.log("🚀 ~ useEffect ~ isSupported:", isSupported);
+  }, []);
+
   // 컴포넌트 마운트 시 알림 권한 요청
   useEffect(() => {
+    if (!isNotificationSupported) return; // ⭐️ 추가
+
     // 권한이 아직 결정되지 않은 경우 권한 요청
     if (Notification.permission === "default") {
       console.log("권한을 설정해주세요");
@@ -15,7 +28,7 @@ const useNotification = () => {
         console.log("알림 권한 상태:", permission);
       });
     }
-  }, []);
+  }, [isNotificationSupported]);
 
   /**
    * 새 게시물 알림을 표시하는 함수
@@ -23,6 +36,8 @@ const useNotification = () => {
    * @param {object} postData - 게시물 데이터 { userName, content }
    */
   const showNewPostNotification = (title, { userName, content }) => {
+    if (!isNotificationSupported) return; // ⭐️ 알림기능 지원이 가능하지 않으면 실행안함
+
     // 권한이 허용된 경우에만 알림 표시
     if (Notification.permission === "granted") {
       console.log("권한있음!!!");
